@@ -1,11 +1,9 @@
 import { useState } from 'react';
 
-function Sidebar({ classes, selectedClass, onSelectClass, onAddClass, onUpdateClass, onOpenSettings }) {
+function Sidebar({ classes, selectedClass, onSelectClass, onAddClass, onOpenSettings, onGoHome, onViewAllClasses, view }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newYear, setNewYear] = useState('');
   const [newFormTeacher, setNewFormTeacher] = useState('');
-  const [editingClass, setEditingClass] = useState(null);
-  const [editFormTeacher, setEditFormTeacher] = useState('');
 
   const currentYear = new Date().getFullYear();
   const currentGradYear = currentYear + 3;
@@ -23,17 +21,6 @@ function Sidebar({ classes, selectedClass, onSelectClass, onAddClass, onUpdateCl
     }
   };
 
-  const handleEditSubmit = (year) => {
-    onUpdateClass(year, { formTeacher: editFormTeacher.trim() || null });
-    setEditingClass(null);
-    setEditFormTeacher('');
-  };
-
-  const startEdit = (classData) => {
-    setEditingClass(classData.year);
-    setEditFormTeacher(classData.formTeacher || '');
-  };
-
   const getGradeLevel = (gradYear) => {
     const diff = gradYear - currentYear;
     const grade = 10 - diff;
@@ -45,13 +32,22 @@ function Sidebar({ classes, selectedClass, onSelectClass, onAddClass, onUpdateCl
 
   const activeClasses = classes.filter(c => c.year >= currentYear);
   const archivedClasses = classes.filter(c => c.year < currentYear);
+  
+  const ACTIVE_LIMIT = 6;
+  const GRADUATED_LIMIT = 3;
+  
+  const visibleActiveClasses = activeClasses.slice(0, ACTIVE_LIMIT);
+  const visibleGraduatedClasses = archivedClasses.slice(0, GRADUATED_LIMIT);
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 p-4 overflow-y-auto">
-      <div className="mb-6">
+      <button 
+        onClick={onGoHome}
+        className="mb-6 text-left w-full hover:opacity-70 transition-opacity"
+      >
         <h1 className="text-xl font-bold text-gray-800">Head Teacher</h1>
         <p className="text-sm text-gray-500">Student Records</p>
-      </div>
+      </button>
 
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
@@ -106,77 +102,42 @@ function Sidebar({ classes, selectedClass, onSelectClass, onAddClass, onUpdateCl
         )}
 
         <div className="space-y-1">
-          {activeClasses.map((classData) => (
-            <div key={classData.year}>
-              {editingClass === classData.year ? (
-                <div className="p-2 bg-blue-50 rounded border border-blue-200">
-                  <input
-                    type="text"
-                    value={editFormTeacher}
-                    onChange={(e) => setEditFormTeacher(e.target.value)}
-                    placeholder="Form Teacher"
-                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded mb-2"
-                    autoFocus
-                  />
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => handleEditSubmit(classData.year)}
-                      className="flex-1 px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => {
-                        setEditingClass(null);
-                        setEditFormTeacher('');
-                      }}
-                      className="flex-1 px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className={`px-3 py-2 rounded transition-colors ${
-                    selectedClass === classData.year
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <button
-                      onClick={() => onSelectClass(classData.year)}
-                      className="flex-1 text-left"
-                    >
-                      <div className="text-sm font-medium">Class of {classData.year}</div>
-                      <div className="text-xs text-gray-500">{getGradeLevel(classData.year)}</div>
-                      {classData.formTeacher && (
-                        <div className="text-xs text-gray-600 mt-1 italic">
-                          {classData.formTeacher}
-                        </div>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => startEdit(classData)}
-                      className="text-xs text-blue-600 hover:text-blue-700 ml-2"
-                      title="Edit form teacher"
-                    >
-                      ✏️
-                    </button>
-                  </div>
+          {visibleActiveClasses.map((classData) => (
+            <div
+              key={classData.year}
+              onClick={() => onSelectClass(classData.year)}
+              className={`px-3 py-2 rounded transition-colors cursor-pointer ${
+                selectedClass === classData.year
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <div className="text-sm font-medium">Class of {classData.year}</div>
+              <div className="text-xs text-gray-500">{getGradeLevel(classData.year)}</div>
+              {classData.formTeacher && (
+                <div className="text-xs text-gray-600 mt-1 italic">
+                  {classData.formTeacher}
                 </div>
               )}
             </div>
           ))}
+          
+          {activeClasses.length > ACTIVE_LIMIT && (
+            <button
+              onClick={onViewAllClasses}
+              className="w-full px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors text-left"
+            >
+              See All ({activeClasses.length})
+            </button>
+          )}
         </div>
 
         {archivedClasses.length > 0 && (
           <>
             <div className="my-3 border-t border-gray-200"></div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Archive</h3>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Graduated Classes</h3>
             <div className="space-y-1">
-              {archivedClasses.reverse().map((classData) => (
+              {visibleGraduatedClasses.reverse().map((classData) => (
                 <button
                   key={classData.year}
                   onClick={() => onSelectClass(classData.year)}
@@ -194,6 +155,15 @@ function Sidebar({ classes, selectedClass, onSelectClass, onAddClass, onUpdateCl
                   )}
                 </button>
               ))}
+              
+              {archivedClasses.length > GRADUATED_LIMIT && (
+                <button
+                  onClick={onViewAllClasses}
+                  className="w-full px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors text-left"
+                >
+                  See All ({archivedClasses.length})
+                </button>
+              )}
             </div>
           </>
         )}
@@ -202,9 +172,13 @@ function Sidebar({ classes, selectedClass, onSelectClass, onAddClass, onUpdateCl
       <div className="border-t border-gray-200 pt-4 mt-auto">
         <button
           onClick={onOpenSettings}
-          className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors"
+          className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+            view === 'settings'
+              ? 'bg-blue-50 text-blue-700 font-medium'
+              : 'text-gray-700 hover:bg-gray-50'
+          }`}
         >
-          ⚙️ Settings
+          ⚙️ Preferences
         </button>
       </div>
     </aside>

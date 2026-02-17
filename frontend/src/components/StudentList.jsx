@@ -58,8 +58,13 @@ function StudentList({ students, onSelectStudent, onAddStudent, graduationYear }
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800">{student.name}</h3>
+                  {student.admissionNumber && (
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      Admission: {student.admissionNumber}
+                    </p>
+                  )}
                   <p className="text-sm text-gray-600 mt-1">
-                    Parent: {student.parentInfo.name || 'Not specified'}
+                    Guardian: {student.parentInfo.name || 'Not specified'}
                   </p>
                   <p className="text-sm text-gray-500">
                     {student.parentInfo.phone || 'No phone'}

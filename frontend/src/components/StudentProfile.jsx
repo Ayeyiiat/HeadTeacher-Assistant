@@ -83,13 +83,18 @@ function StudentProfile({ student, settings, onBack, onUpdate, onDelete }) {
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Student Information</h3>
-              <p className="text-gray-600">
-                <span className="font-medium">Class:</span> {student.graduationYear}
-              </p>
+              <div className="space-y-1 text-gray-600">
+                <p>
+                  <span className="font-medium">Admissions Number:</span> {student.admissionNumber || 'Not specified'}
+                </p>
+                <p>
+                  <span className="font-medium">Class:</span> {student.graduationYear}
+                </p>
+              </div>
             </div>
 
             <div className="border-t border-gray-200 pt-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">Parent Information</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Guardian Information</h3>
               <div className="space-y-1 text-gray-600">
                 <p><span className="font-medium">Name:</span> {student.parentInfo.name || 'Not specified'}</p>
                 <p><span className="font-medium">Phone:</span> {student.parentInfo.phone || 'Not specified'}</p>
@@ -106,7 +111,7 @@ function StudentProfile({ student, settings, onBack, onUpdate, onDelete }) {
         {settings.subjects.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <p>No subjects configured yet.</p>
-            <p className="text-sm mt-2">Go to Settings to add subjects.</p>
+            <p className="text-sm mt-2">Go to Preferences to add subjects.</p>
           </div>
         ) : (
           <GradeTable

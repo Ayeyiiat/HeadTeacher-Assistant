@@ -5,6 +5,9 @@ import StudentList from './components/StudentList';
 import StudentProfile from './components/StudentProfile';
 import Settings from './components/Settings';
 import SearchBar from './components/SearchBar';
+import ClassManagement from './components/ClassManagement';
+import Home from './components/Home';
+import AllClasses from './components/AllClasses';
 
 function App() {
   const [classes, setClasses] = useLocalStorage('hta-classes', []);
@@ -17,7 +20,7 @@ function App() {
   
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [view, setView] = useState('list');
+  const [view, setView] = useState('home');
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredStudents = searchQuery
@@ -42,6 +45,28 @@ function App() {
 
   const handleUpdateClass = (year, updates) => {
     setClasses(classes.map(c => c.year === year ? { ...c, ...updates } : c));
+  };
+
+  const handleDeleteClass = (year) => {
+    setClasses(classes.filter(c => c.year !== year));
+    if (selectedClass === year) {
+      setSelectedClass(null);
+      setSelectedStudent(null);
+      setView('list');
+    }
+  };
+
+  const handleDeleteClassWithStudents = (year) => {
+    // Delete all students in the class
+    setStudents(students.filter(s => s.graduationYear !== year));
+    // Delete the class
+    setClasses(classes.filter(c => c.year !== year));
+    // Clear selection
+    if (selectedClass === year) {
+      setSelectedClass(null);
+      setSelectedStudent(null);
+      setView('list');
+    }
   };
 
   const handleAddStudent = (student) => {
@@ -80,6 +105,7 @@ function App() {
       <Sidebar 
         classes={classes}
         selectedClass={selectedClass}
+        view={view}
         onSelectClass={(year) => {
           setSelectedClass(year);
           setSelectedStudent(null);
@@ -87,12 +113,65 @@ function App() {
           setSearchQuery('');
         }}
         onAddClass={handleAddClass}
-        onUpdateClass={handleUpdateClass}
-        onOpenSettings={() => setView('settings')}
+        onOpenSettings={() => {
+          setSelectedClass(null);
+          setSelectedStudent(null);
+          setView('settings');
+          setSearchQuery('');
+        }}
+        onGoHome={() => {
+          setSelectedClass(null);
+          setSelectedStudent(null);
+          setView('home');
+          setSearchQuery('');
+        }}
+        onViewAllClasses={() => {
+          setSelectedClass(null);
+          setSelectedStudent(null);
+          setView('allClasses');
+          setSearchQuery('');
+        }}
       />
       
       <main className="flex-1 p-6 bg-gray-50">
-        {view === 'settings' ? (
+        {view === 'home' ? (
+          <>
+            <div className="mb-6">
+              <SearchBar 
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search students by name, guardian, or phone..."
+              />
+            </div>
+            {searchQuery ? (
+              <div>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                  Search Results ({filteredStudents.length})
+                </h2>
+                <StudentList 
+                  students={filteredStudents}
+                  onSelectStudent={(s) => {
+                    setSelectedStudent(s);
+                    setSelectedClass(s.graduationYear);
+                    setSearchQuery('');
+                    setView('profile');
+                  }}
+                />
+              </div>
+            ) : (
+              <Home classes={classes} students={students} />
+            )}
+          </>
+        ) : view === 'allClasses' ? (
+          <AllClasses 
+            classes={classes}
+            onSelectClass={(year) => {
+              setSelectedClass(year);
+              setSelectedStudent(null);
+              setView('list');
+            }}
+          />
+        ) : view === 'settings' ? (
           <Settings settings={settings} onSave={handleSaveSettings} />
         ) : (
           <>
@@ -114,6 +193,7 @@ function App() {
                   onSelectStudent={(s) => {
                     setSelectedStudent(s);
                     setSelectedClass(s.graduationYear);
+                    setSearchQuery('');
                     setView('profile');
                   }}
                 />
@@ -121,13 +201,13 @@ function App() {
             ) : selectedClass ? (
               view === 'list' ? (
                 <>
-                  {selectedClassData?.formTeacher && (
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-sm text-blue-800">
-                        <span className="font-medium">Form Teacher:</span> {selectedClassData.formTeacher}
-                      </p>
-                    </div>
-                  )}
+                  <ClassManagement 
+                    classData={selectedClassData}
+                    onUpdate={handleUpdateClass}
+                    onDelete={handleDeleteClass}
+                    onDeleteWithStudents={handleDeleteClassWithStudents}
+                    studentCount={filteredStudents.length}
+                  />
                   <StudentList 
                     students={filteredStudents}
                     onSelectStudent={(s) => {

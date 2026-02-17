@@ -4,6 +4,7 @@ function StudentForm({ student, onSubmit, onCancel }) {
   const [formData, setFormData] = useState(
     student || {
       name: '',
+      admissionNumber: '',
       parentInfo: {
         name: '',
         phone: '',
@@ -50,13 +51,26 @@ function StudentForm({ student, onSubmit, onCancel }) {
         />
       </div>
 
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Admissions Number
+        </label>
+        <input
+          type="text"
+          value={formData.admissionNumber}
+          onChange={(e) => handleChange('admissionNumber', e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="e.g., ADM-2024-001"
+        />
+      </div>
+
       <div className="border-t border-gray-200 pt-4">
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">Parent Information</h4>
+        <h4 className="text-sm font-semibold text-gray-700 mb-3">Guardian Information</h4>
         
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Parent Name
+              Guardian Name
             </label>
             <input
               type="text"

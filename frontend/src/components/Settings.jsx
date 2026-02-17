@@ -51,7 +51,7 @@ function Settings({ settings, onSave }) {
 
   return (
     <div className="max-w-3xl">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Settings</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Preferences</h2>
 
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Subjects</h3>
@@ -178,7 +178,7 @@ function Settings({ settings, onSave }) {
         onClick={handleSave}
         className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
       >
-        Save Settings
+        Save Preferences
       </button>
     </div>
   );
